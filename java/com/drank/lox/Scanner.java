@@ -78,8 +78,13 @@ class Scanner {
             // string literals
             case '"': string(); break;
 
-            // error
-            default: Lox.error(line, "Unexpected character."); break;
+            default:
+                if (isDigit(c)) {
+                    number();
+                } else {
+                    Lox.error(line, "Unexpected character.");
+                }
+                break;
         }
     }
 
@@ -97,6 +102,11 @@ class Scanner {
     private char peek() {
         if (isAtEnd()) { return '\0'; }
         return source.charAt(current);
+    }
+
+    private char peekNext() {
+        if (current + 1 >= source.length()) { return '\0'; }
+        return source.charAt(current + 1);
     }
 
     private void addToken(TokenType type) {
@@ -124,6 +134,28 @@ class Scanner {
 
         // remove quotes
         String value = source.substring(start + 1, current - 1);
+        addToken(TokenType.STRING, value);
+    }
+
+    private boolean isDigit(char c) {
+        return c >= '0' && c <= '9';
+    }
+
+    private void number() {
+        while (isDigit(peek())) {
+            advance();
+        }
+
+        if (peek() == '.' && isDigit(peekNext())) {
+            // consume the '.'
+            advance();
+        }
+
+        while (isDigit(peek())) {
+            advance();
+        }
+
+        double value = Double.parseDouble(source.substring(start, current));
         addToken(TokenType.STRING, value);
     }
 }
