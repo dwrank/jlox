@@ -83,6 +83,8 @@ class Scanner {
                     while (peek() != '\n' && !isAtEnd()) {
                         advance();
                     }
+                } else if (match('*')) {
+                    block_comments();
                 } else {
                     addToken(TokenType.SLASH);
                 }
@@ -205,4 +207,24 @@ class Scanner {
         double value = Double.parseDouble(source.substring(start, current));
         addToken(TokenType.STRING, value);
     }
+
+    private void block_comments() {
+        while (peek() != '*' &&
+               peekNext() != '/' &&
+               !isAtEnd()) {
+            if (advance() == '\n') {
+                line++;
+            }
+        }
+
+        if (isAtEnd()) {
+            Lox.error(line, "Unterminated block comments.");
+            return;
+        }
+
+        // advance past the closing '*/'
+        advance();
+        advance();
+    }
+
 }
