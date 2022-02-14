@@ -17,7 +17,10 @@ def define_ast(output_dir, baseclass, classes):
         # base class
         write_code(f, indent, 'abstract class %s {\n' % baseclass)
 
+        # visitor
         indent += 1
+        define_visitor(f, indent, baseclass, classes)
+
         for cl in classes:
             name = cl['class']
             fields = cl['fields']
@@ -29,13 +32,17 @@ def define_ast(output_dir, baseclass, classes):
             indent += 1
             write_code(f, indent, '%s(%s) {\n' % (name, ', '.join(fields)))
 
-            indent += 1
             for field in fields:
                 var = field.split()[1]
-                write_code(f, indent, 'this.%s = %s;\n' % (var, var))
+                write_code(f, indent + 1, 'this.%s = %s;\n' % (var, var))
 
             # end constructor
-            indent -= 1
+            write_code(f, indent, '}\n\n')
+
+            # visitor pattern
+            write_code(f, indent, '@Override\n')
+            write_code(f, indent, '<R> R accept(Visitor<R> visitor) {\n')
+            write_code(f, indent + 1, 'return visitor.visit%s%s(this);\n' % (name, baseclass)) 
             write_code(f, indent, '}\n\n')
 
             # member vars
@@ -46,11 +53,24 @@ def define_ast(output_dir, baseclass, classes):
             indent -= 1
             write_code(f, indent, '}\n\n')
 
+        # base class accept method
+        write_code(f, indent, "abstract <R> R accept(Visitor<R> visitor);\n")
+
         # end base class
         indent -= 1
         write_code(f, indent, '}\n')
 
     print('Created %s' % file)
+
+
+def define_visitor(f, indent, baseclass, classes):
+    write_code(f, indent, 'interface Visitor<R> {\n')
+
+    for c in classes:
+        name = c['class']
+        write_code(f, indent + 1, 'R visit%s%s(%s expr);\n' % (name, baseclass, name))
+
+    write_code(f, indent, '}\n\n')
 
 
 def write_code(f, indent, s):
