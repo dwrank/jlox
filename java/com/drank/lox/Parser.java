@@ -22,8 +22,22 @@ class Parser {
         }
     }
 
+    // expression -> comma ;
     private Expr expression() {
-        return equality();
+        return comma();
+    }
+
+    // comma -> equality ("," equality)* ;
+    private Expr comma() {
+        Expr expr = equality();
+
+        while (match(TokenType.COMMA)) {
+            Token operator = previous();
+            Expr right = equality();
+            expr = new Expr.Binary(expr, operator, right);
+        }
+
+        return expr;
     }
 
     // equality -> comparison ( ("!=" | "==") comparison )* ;
