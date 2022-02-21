@@ -27,14 +27,35 @@ class Parser {
         return comma();
     }
 
-    // comma -> equality ("," equality)* ;
+    // comma -> conditional ("," conditional)* ;
     private Expr comma() {
-        Expr expr = equality();
+        Expr expr = conditional();
 
         while (match(TokenType.COMMA)) {
             Token operator = previous();
-            Expr right = equality();
+            Expr right = conditional();
             expr = new Expr.Binary(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    // conditional -> equality ("?" expression ":" expression)?
+    private Expr conditional() {
+        Expr expr = equality();
+
+        if (match(TokenType.QUESTION)) {
+            Expr thenBranch = expression();
+
+            consume(TokenType.COLON, "Expect ':' after expression.");
+
+            // can not be an expression here or else you can not have a comma
+            // after the conditional
+            // 1 ? 2 : 3, 4  => (, (conditional 1.0 2.0 3.0) 4.0)
+            // this is wrong => (, (conditional 1.0 2.0 (, 3.0 4.0)))
+            Expr elseBranch = conditional();
+
+            expr = new Expr.Conditional(expr, thenBranch, elseBranch);
         }
 
         return expr;

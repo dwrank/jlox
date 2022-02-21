@@ -90,5 +90,6 @@ if __name__ == '__main__':
                 {'class': 'Grouping', 'fields': ['Expr expression']},
                 {'class': 'Literal', 'fields': ['Object value']},
                 {'class': 'Unary', 'fields': ['Token operator', 'Expr right']},
+                {'class': 'Conditional', 'fields': ['Expr condition', 'Expr thenBranch', 'Expr elseBranch']},
             ]
     )
