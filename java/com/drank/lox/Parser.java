@@ -128,6 +128,11 @@ class Parser {
 
     // primary -> NUMBER | STRING | "true" | "false" | "nil" ;
     //         -> | "(" expression ")" ;
+    //         Error productions ...
+    //         -> ("!=", "==") equality ;
+    //         -> ("<", "<=", ">", ">=") comparison ;
+    //         -> ("+") term ;
+    //         -> ("/", "*") factor ;
     private Expr primary() {
         if (match(TokenType.NUMBER, TokenType.STRING)) {
             return new Expr.Literal(previous().literal);
@@ -140,6 +145,32 @@ class Parser {
             Expr expr = expression();
             consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
             return new Expr.Grouping(expr);
+        }
+
+        // Error productions
+        if (match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)) {
+            error(previous(), "Missing left-hand operand.");
+            equality();
+            return null;
+        }
+
+        if (match(TokenType.LESSER, TokenType.LESSER_EQUAL,
+                  TokenType.GREATER, TokenType.GREATER_EQUAL)) {
+            error(previous(), "Missing left-hand operand.");
+            comparison();
+            return null;
+        }
+
+        if (match(TokenType.PLUS)) {
+            error(previous(), "Missing left-hand operand.");
+            term();
+            return null;
+        }
+
+        if (match(TokenType.SLASH, TokenType.STAR)) {
+            error(previous(), "Missing left-hand operand.");
+            factor();
+            return null;
         }
 
         throw error(peek(), "Expect expression.");
