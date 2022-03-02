@@ -1,6 +1,7 @@
 package com.drank.lox;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import com.drank.lox.TokenType;
 
@@ -14,12 +15,32 @@ class Parser {
         this.tokens = tokens;
     }
 
-    Expr parse() {
-        try {
-            return expression();
-        } catch (ParseError error) {
-            return null;
+    List<Stmt> parse() {
+        List<Stmt> statements = new ArrayList<>();
+        while (!isAtEnd()) {
+            statements.add(statement());
         }
+        return statements;
+    }
+
+    // statement -> printStatement | exprStatement ;
+    private Stmt statement() {
+        if (match(TokenType.PRINT)) { return printStatement(); }
+        return expressionStatement();
+    }
+
+    // printStmt -> "print" expression ";" ;
+    private Stmt printStatement() {
+        Expr value = expression();
+        consume(TokenType.SEMICOLON, "Expect ';' after value");
+        return new Stmt.Print(value);
+    }
+    
+    // exprStmt -> expression ";" ;
+    private Stmt expressionStatement() {
+        Expr value = expression();
+        consume(TokenType.SEMICOLON, "Expect ';' after expression");
+        return new Stmt.Expression(value);
     }
 
     // expression -> comma ;
