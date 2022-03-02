@@ -93,3 +93,10 @@ if __name__ == '__main__':
                 {'class': 'Conditional', 'fields': ['Expr condition', 'Expr thenBranch', 'Expr elseBranch']},
             ]
     )
+
+    define_ast(output_dir, 'Stmt',
+            [
+                {'class': 'Expression', 'fields': ['Expr expression']},
+                {'class': 'Print', 'fields': ['Expr expression']},
+            ]
+    )
