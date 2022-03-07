@@ -15,12 +15,37 @@ class Parser {
         this.tokens = tokens;
     }
 
+    // program -> declaration* EOF ;
     List<Stmt> parse() {
         List<Stmt> statements = new ArrayList<>();
         while (!isAtEnd()) {
-            statements.add(statement());
+            statements.add(declaration());
         }
         return statements;
+    }
+
+    // declaration -> varDecl | statement;
+    private Stmt declaration() {
+        try {
+            if (match(TokenType.VAR)) { return varDeclaration(); }
+            return statement();
+        } catch (ParseError error) {
+            synchronize();
+            return null;
+        }
+    }
+
+    // varDeclaration -> "var" IDENTIFIER ( "=" expression )? ";" ;
+    private Stmt varDeclaration() {
+        Token name = consume(TokenType.IDENTIFIER, "Expect variable name.");
+
+        Expr initializer = null;
+        if (match(TokenType.EQUAL)) {
+            initializer = expression();
+        }
+
+        consume(TokenType.SEMICOLON, "Expect ';' after declaration.");
+        return new Stmt.Var(name, initializer);
     }
 
     // statement -> printStatement | exprStatement ;
@@ -148,7 +173,7 @@ class Parser {
     }
 
     // primary -> NUMBER | STRING | "true" | "false" | "nil" ;
-    //         -> | "(" expression ")" ;
+    //         -> | "(" expression ")" | IDENTIFIER;
     //         Error productions ...
     //         -> ("!=", "==") equality ;
     //         -> ("<", "<=", ">", ">=") comparison ;
@@ -158,6 +183,7 @@ class Parser {
         if (match(TokenType.NUMBER, TokenType.STRING)) {
             return new Expr.Literal(previous().literal);
         }
+        if (match(TokenType.IDENTIFIER)) { return new Expr.Variable(previous()); }
         if (match(TokenType.TRUE)) { return new Expr.Literal(true); }
         if (match(TokenType.FALSE)) { return new Expr.Literal(false); }
         if (match(TokenType.NIL)) { return new Expr.Literal(null); }

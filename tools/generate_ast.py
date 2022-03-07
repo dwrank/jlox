@@ -91,6 +91,7 @@ if __name__ == '__main__':
                 {'class': 'Literal', 'fields': ['Object value']},
                 {'class': 'Unary', 'fields': ['Token operator', 'Expr right']},
                 {'class': 'Conditional', 'fields': ['Expr condition', 'Expr thenBranch', 'Expr elseBranch']},
+                {'class': 'Variable', 'fields': ['Token name']},
             ]
     )
 
@@ -98,5 +99,6 @@ if __name__ == '__main__':
             [
                 {'class': 'Expression', 'fields': ['Expr expression']},
                 {'class': 'Print', 'fields': ['Expr expression']},
+                {'class': 'Var', 'fields': ['Token name', 'Expr initializer']},
             ]
     )
