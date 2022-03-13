@@ -86,6 +86,7 @@ if __name__ == '__main__':
 
     define_ast(output_dir, 'Expr',
             [
+                {'class': 'Assign', 'fields': ['Token name', 'Expr value']},
                 {'class': 'Binary', 'fields': ['Expr left', 'Token operator', 'Expr right']},
                 {'class': 'Grouping', 'fields': ['Expr expression']},
                 {'class': 'Literal', 'fields': ['Object value']},

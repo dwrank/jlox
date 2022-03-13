@@ -68,10 +68,32 @@ class Parser {
         return new Stmt.Expression(value);
     }
 
-    // expression -> comma ;
+    // expression -> assignment ;
     private Expr expression() {
-        return comma();
+        return assignment();
     }
+
+    // assignment -> IDENTIFIER "=" assignment
+    //            |  comma ;
+    private Expr assignment() {
+        Expr expr = equality();
+
+        if (match(TokenType.EQUAL)) {
+            Token equals = previous();
+            Expr value = comma();
+
+            if (expr instanceof Expr.Variable) {
+                Token name = ((Expr.Variable)expr).name;
+                return new Expr.Assign(name, value);
+            }
+
+            error(equals, "Invalid assignment target.");
+        }
+
+        return expr;
+    }
+
+    // expression -> comma ;
 
     // comma -> conditional ("," conditional)* ;
     private Expr comma() {
